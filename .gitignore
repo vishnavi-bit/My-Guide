@@ -2,3 +2,4 @@
 .claude/requirements.json
 .knm/
 .project-knm
+.node_modules/
