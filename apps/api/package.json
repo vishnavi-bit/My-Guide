@@ -1,0 +1,22 @@
+{
+  "name": "api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.17.0",
+    "@types/express": "^5.0.0",
+    "@types/jest": "^29.0.0",
+    "drizzle-orm": "^0.45.0",
+    "express": "^5.0.0",
+    "jest": "^29.0.0",
+    "jose": "^4.15.0",
+    "ts-jest": "^29.0.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.6.3"
+  }
+}
