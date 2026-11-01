@@ -1,0 +1,25 @@
+{
+  "name": "api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build.js",
+    "dev": "node --env-file-if-exists=.env --import tsx src/main.ts",
+    "start": "node --env-file-if-exists=.env dist/main.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.17.0",
+    "@types/express": "^5.0.0",
+    "@types/jest": "^29.0.0",
+    "drizzle-orm": "^0.45.0",
+    "express": "^5.0.0",
+    "jest": "^29.0.0",
+    "jose": "^4.15.0",
+    "ts-jest": "^29.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15",
+    "typescript": "~5.6.3"
+  }
+}

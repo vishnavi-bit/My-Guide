@@ -3,3 +3,13 @@
 .knm/
 .project-knm
 .node_modules/
+
+# Local secrets (scaffold never stores these)
+.env
+**/.env
+node_modules/
+dist/
+coverage/
+
+# Local database files (module default: file:./data/app.db)
+data/
