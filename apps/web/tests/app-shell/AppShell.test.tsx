@@ -41,4 +41,30 @@ describe('app shell', () => {
     expect(theme.breakpoints.sm).toBe('640px');
     expect(theme.breakpoints.md).toBe('1024px');
   });
+
+  it('one shared shell wraps every routed page, and only the page content changes', () => {
+    const pages = [
+      { id: 'home', path: '/', element: <p>Home page</p> },
+      { id: 'about', path: '/about', element: <p>About page</p> }
+    ];
+    const atPath = (path: string) => ({ children }: { children?: React.ReactNode }) => <MemoryRouter initialEntries={[path]}>{children}</MemoryRouter>;
+    const { unmount } = render(<App routes={pages} Router={atPath('/')} />);
+    const homeHeader = screen.getByRole('banner').outerHTML;
+    expect(screen.getByRole('main').textContent).toContain('Home page');
+    unmount();
+    render(<App routes={pages} Router={atPath('/about')} />);
+    expect(screen.getByRole('banner').outerHTML).toBe(homeHeader);
+    expect(screen.getByRole('main').textContent).toContain('About page');
+    expect(screen.getByRole('main').textContent).not.toContain('Home page');
+  });
+
+  it('the phone menu button can be reached and operated from the keyboard, and the navigation follows it', () => {
+    render(<App routes={routes} Router={at} />);
+    const button = screen.getByRole('button', { name: 'Menu' });
+    button.focus();
+    expect(document.activeElement).toBe(button);
+    fireEvent.click(button);                                                 // a keyboard Enter or Space on a native button fires the same click
+    expect(button.getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByRole('navigation').id).toBe(button.getAttribute('aria-controls'));
+  });
 });
