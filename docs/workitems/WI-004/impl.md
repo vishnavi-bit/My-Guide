@@ -11,6 +11,12 @@ Requirement: REQ-007 (approved). Decision: DEC-036. Feature: FEAT-475.
 - WhatsApp bonus: when the offer is switched on, verifying a connected WhatsApp number adds two bonus credits, once per user. When the offer is off, verification adds nothing.
 - The offer is an admin toggle in the pricing and credit configuration. No date-based scheduling.
 - Credits do not expire.
+- Audit lines for guests never contain the full guest identifier. The guest's audit actor is a keyed HMAC of the identifier, prefixed `guest:` (for example `guest:<hash>`), so lines from the same guest can still be matched. Account identifiers are logged unchanged. Stored audit records keep the hash, not the identifier.
+- The HMAC key is the environment variable `AUDIT_HASH_KEY`. It has no default and must not reuse `JWT_SECRET`. The API refuses to start when `AUDIT_HASH_KEY` is missing, empty, shorter than 32 characters, or equal to `JWT_SECRET`. Tests supply a fake key the same way they already supply `JWT_SECRET`: a constant of at least 32 characters, different from the test `JWT_SECRET`, passed through `withEnv` in every test file that builds the app or writes audit lines (`tests/modules/billing/contract/queryRoute.test.ts` and `tests/modules/billing/fit/routes.test.ts`). A real key goes only in `apps/api/.env`, never in test files or committed code. It never falls back to logging the guest identifier in the clear, and it never skips guest audit lines silently, because a gap in the audit trail would go unnoticed. The name is listed in `.env.example` with no value.
+- Where the check runs: in `start()` (`apps/api/src/http/server.ts`), before the app is created and migrations run. `main.ts` calls `start()`, so `npm run dev` and `npm start` both stop there. The hashing helper reads `AUDIT_HASH_KEY` when a line is written, not at import time, because the billing audit trail is built when the glue routes are imported.
+- Startup error text names the variable and the rule only (for example "AUDIT_HASH_KEY must be set in apps/api/.env: at least 32 characters, and different from JWT_SECRET"). It never prints the key or the length of the value.
+- Test: when `AUDIT_HASH_KEY` is missing, too short or equal to `JWT_SECRET`, the thrown error message must not contain the key value or its length. The test sets each case with `withEnv`, calls the start check, and asserts that the error names `AUDIT_HASH_KEY` and that its message contains neither the key value nor the length.
+- Tests that call `start()` or write guest audit lines need the fake key: `tests/modules/express/contract/server.test.ts`, `tests/modules/billing/fit/routes.test.ts` (both through `start()`) and `tests/modules/billing/contract/queryRoute.test.ts` (guest charge lines). The other test files need no change: `app.test.ts` calls `createApp()` only, `glue.test.ts` imports the glue routes without writing audit lines, and `ledger.test.ts` writes no audit lines.
 
 ## Areas and files likely affected
 API (primary)
@@ -33,6 +39,7 @@ Web (other)
 - Double bonus grant on repeated WhatsApp verification. Needs a unique per-user marker.
 - Guest-to-account transfer on sign-up must not double count if sign-up is retried.
 - Toggle changes mid-flow: a user who passed verification while the offer was on keeps the grant only if it was applied at that time.
+- Error handler (`apps/api/src/http/app.ts`, around line 41): on a 500 it prints the whole error object. A database error could carry a guest identifier in its message or bound values, which would then appear in logs. Follow-up, not in this item; review it when the database is wired in.
 
 ## Assumptions
 - The WhatsApp connect and verify flow already exists or is provided elsewhere; this work only hooks into its verified event.
