@@ -1,0 +1,60 @@
+{
+  "entity_type": "requirement",
+  "entity_id": "REQ-006",
+  "assigned_to": "Pua6ezZowteUtW37dndRPa890B93",
+  "status": "pending",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single_choice",
+      "text": "Which navigation pattern should be used on phone-sized screens?",
+      "options": [
+        "Collapsible menu opened from the header",
+        "Fixed bottom navigation bar",
+        "Keep the same header navigation, scaled down"
+      ],
+      "allowOther": true,
+      "reason": "The blueprint does not say how navigation should change on small screens, and the choice changes the layout of the app shell.",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q2",
+      "type": "text",
+      "text": "What viewport widths should define phone, tablet and desktop layouts (for example, below 640px for phone)?",
+      "reason": "The breakpoints are not stated in the decision, feature or blueprint, and they are needed to test the acceptance criteria.",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q3",
+      "type": "yes_no",
+      "text": "Should this requirement include creating the app shell now if the repository does not yet have one?",
+      "reason": "The request says to create the app shell if it is missing. Whether one exists is a repository fact I did not assess here, so the owner should confirm the scope.",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q4",
+      "type": "single_choice",
+      "text": "Which browsers must be supported for the responsive layout?",
+      "options": [
+        "Current versions of Chrome, Edge, Firefox and Safari, on desktop and mobile",
+        "Current Chrome and Safari only",
+        "Other (please specify)"
+      ],
+      "allowOther": true,
+      "reason": "The support target affects which layout behaviours must be tested.",
+      "required": false,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    }
+  ]
+}
