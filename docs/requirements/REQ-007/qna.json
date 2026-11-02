@@ -1,0 +1,94 @@
+{
+  "entity_type": "requirement",
+  "entity_id": "REQ-007",
+  "assigned_to": "Pua6ezZowteUtW37dndRPa890B93",
+  "status": "pending",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single_choice",
+      "text": "Which users receive the first two free queries?",
+      "options": [
+        "Guest and signed-in users alike",
+        "Signed-in users only"
+      ],
+      "allowOther": true,
+      "reason": "The decision and feature say 'eligible user' without defining eligibility. The blueprint also describes guest-first access, so the two readings change the requirement.",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q2",
+      "type": "text",
+      "text": "How is a guest's free allowance tracked (for example per browser, per device or per phone number), and what happens to it when the guest signs up later?",
+      "reason": "No tracking method is stated. Tracking choice affects abuse risk and what happens when a guest later creates an account.",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q3",
+      "type": "yes_no",
+      "text": "Does a query that ends without a useful action plan use up one of the free queries?",
+      "reason": "The blueprint says unresolved queries are not charged, but it does not say whether they count against the free allowance.",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q4",
+      "type": "single_choice",
+      "text": "Are free queries and bonus credits one shared balance or separate balances?",
+      "options": [
+        "One shared balance",
+        "Separate balances"
+      ],
+      "allowOther": true,
+      "reason": "The feature asks for a 'remaining free queries or credits' display, which only works if the balance model is known.",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q5",
+      "type": "single_choice",
+      "text": "How is the WhatsApp bonus offer switched on and off?",
+      "options": [
+        "Admin toggle in pricing and credit configuration",
+        "Fixed start and end dates",
+        "Other"
+      ],
+      "allowOther": true,
+      "reason": "The feature says the bonus applies 'when the offer is active' and the blueprint says the offer rules are not yet finalised. The activation method is needed to build and test it.",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q6",
+      "type": "yes_no",
+      "text": "Can each user receive the WhatsApp bonus credits only once?",
+      "reason": "Nothing says whether repeated connect and verify cycles earn more credits.",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q7",
+      "type": "yes_no",
+      "text": "Do free queries or bonus credits expire?",
+      "reason": "No expiry rule appears in the decision, feature or blueprint.",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    }
+  ]
+}
