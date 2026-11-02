@@ -7,21 +7,36 @@ Requirement: REQ-006 (Responsive layout for desktop, tablet and mobile browsers)
 ## Decisions from the requirement Q&A
 - Phone navigation: a collapsible menu opened from the header. No fixed bottom navigation bar.
 - Breakpoints: phone below 640px; tablet 640px to 1023px; desktop 1024px and above.
-- The app shell is created now, because the repository has no shell yet.
+- The app shell already exists on this branch (`scaffold/SCF-0001`). Use the existing shell and extend it. Do not create a new shell.
 - Browser support: current versions of Chrome, Edge, Firefox and Safari, on desktop and mobile.
 
 ## Approach
-- Create a shared app shell in the web app: a common header (with the phone menu toggle), a navigation area and a main content area. Pages render inside the shell so responsive behaviour is applied once, not per page.
+- Use the existing app shell and extend it with a common header (with the phone menu toggle), a navigation area and a main content area. Pages render inside the shell so responsive behaviour is applied once, not per page.
 - Apply the three breakpoints above in the shell and shared layout, using Chakra UI responsive style props, so content never exceeds the viewport width and no horizontal page scroll occurs.
 - On phone widths, the navigation is hidden behind the header menu button and opens as a collapsible menu. The menu and its button are reachable and operable by touch and keyboard.
 - Apply touch-friendly sizing to shared interactive primitives used by visitor pages (buttons, inputs, choice controls, example-query chips): minimum target size on touch devices, using the existing design tokens in `apps/web/src/styling/tokens.ts`.
 - Keep presentation only. No new routes, content, copy or behaviour are added, and existing text and behaviour stay unchanged.
 
-## Areas and files likely affected (apps/web)
-- `src/app/App.tsx`: the shell wrapper is rendered around the routed content. The file already holds the app shell logic (providers, router, error boundary), so the shell layout component is added beside it rather than in the glue.
-- `src/app/providers.tsx` and `src/app/router.tsx`: glue files. Only edited if a shell provider or route registration is needed, through their marked entry points.
-- `src/styling/ChakraAppProvider.tsx` and `src/styling/tokens.ts`: breakpoint values and touch target size tokens, if they are added as tokens rather than inline values.
-- New shell component(s) under `src/app/` (header with menu toggle, navigation, content area), for example `src/app/AppShell.tsx`.
+## Existing shell files (apps/web/src/app)
+Files this work item will change:
+- `App.tsx`: the existing shell. It renders the routed content inside the providers and error boundary. The header, navigation and content area are added around the routed content here, using components imported from `src/app/`.
+- New header and navigation components under `src/app/` (for example `src/app/AppHeader.tsx` and `src/app/AppNav.tsx`), with the phone menu toggle. They are imported into `App.tsx`.
+- `src/styling/tokens.ts`: breakpoint values for phone, tablet and desktop, and touch target sizes. Not one of the five files listed below, but the breakpoints cannot be set anywhere else in the existing shell (see Breakpoints).
+
+Files this work item will not touch:
+- `config.ts`: no change.
+- `providers.tsx`: no change. The existing providers stay as they are.
+- `router.tsx`: no change. Its marked lines are not edited by hand.
+- `theme.ts`: no change. It only merges `chakraTokens` from `tokens.ts` and holds no breakpoints.
+
+Other files likely affected (apps/web):
+- `src/styling/ChakraAppProvider.tsx`: only if a token or theme change needs it.
+- Tests under `apps/web/tests/` for the shell: renders header, navigation and content area; the phone menu opens and closes; navigation is reachable at phone width. Layout checks in real browsers are done manually (see Verification).
+
+## Breakpoints
+- `theme.ts` does not define breakpoints. It only lists `chakraTokens`.
+- `tokens.ts` does not define breakpoints either. Chakra's default breakpoints apply until they are overridden there, and the defaults do not match the requirement (phone below 640px, tablet 640px to 1023px, desktop 1024px and above).
+- The three breakpoints are added to `tokens.ts`, so `theme.ts` does not change.
 - Tests under `apps/web/tests/` for the shell: renders header, navigation and content area; the phone menu opens and closes; navigation is reachable at phone width. Layout checks in real browsers are done manually (see Verification).
 
 ## Risks
