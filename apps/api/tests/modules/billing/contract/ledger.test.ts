@@ -102,6 +102,15 @@ describe('billing ledger contract', () => {
     expect((await getBalance(db, 't1', user('dan'))).bonusCredits).toBe(WHATSAPP_BONUS_CREDITS);
   });
 
+  it('two useful answers at the same time cannot both use the last free query', async () => {
+    const db = await freshDb();
+    const g = guest('browser-8');
+    await recordAnsweredQuery(db, 't1', g, true);                                     // one left
+    const results = await Promise.all([recordAnsweredQuery(db, 't1', g, true), recordAnsweredQuery(db, 't1', g, true)]);
+    expect(results.map((r) => r.charge).sort()).toEqual(['free', 'payment-required']);
+    expect((await getBalance(db, 't1', g)).freeQueries).toBe(0);
+  });
+
   it('balances and grants are tenant-scoped', async () => {
     const db = await freshDb();
     await recordAnsweredQuery(db, 'tenant-a', guest('browser-7'), true);

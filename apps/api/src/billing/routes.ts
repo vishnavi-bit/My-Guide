@@ -8,7 +8,7 @@ import { wrapAsync } from '../http/app';
 import { BillingError, Subject, getBalance, setSetting, SETTING_BONUS_ACTIVE, SETTING_PRICE_CENTS } from './ledger';
 import { WhatsAppSender, startWhatsAppConnect, verifyWhatsAppCode } from './whatsapp';
 
-type BillingRequest = Request & { tenantId?: string; auth?: AuthClaims };
+export type BillingRequest = Request & { tenantId?: string; auth?: AuthClaims };
 
 const GUEST_ID = /^[A-Za-z0-9_-]{8,128}$/;
 
@@ -20,11 +20,11 @@ export function subjectOf(req: BillingRequest): Subject {
   throw new BillingError(401, 'guest-id-required');
 }
 
-const tenantOf = (req: BillingRequest): string => {
+export const tenantOf = (req: BillingRequest): string => {
   if (!req.tenantId) throw new BillingError(401, 'tenant-required');
   return req.tenantId;
 };
-const dbOf = (req: BillingRequest): Db => req.app.get('db') as Db;
+export const dbOf = (req: BillingRequest): Db => req.app.get('db') as Db;
 
 export function createBillingRoutes(options: { sender: WhatsAppSender | null }) {
   return {
