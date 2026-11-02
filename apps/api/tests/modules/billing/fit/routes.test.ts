@@ -58,4 +58,21 @@ describe('billing routes', () => {
       expect((await call(base, 'POST', '/api/whatsapp/connect', undefined, { phone: '+14155550100' })).status).toBe(401);
     });
   });
+
+  it('the guest transfer needs a signed-in user and a valid guest id, moves nothing for an unknown guest, and is audited', async () => {
+    await withServer(async (base) => {
+      const token = await signToken({ userId: 'u4', tenantId: 'tenant-a' }, { secret: SECRET });
+      const transfer = (headers: Record<string, string>) => fetch(`${base}/api/billing/transfer-guest`, { method: 'POST', headers });
+      expect((await transfer({ 'x-guest-id': 'browser-unknown-1' })).status).toBe(401);
+      expect((await transfer({ authorization: `Bearer ${token}`, 'x-guest-id': 'bad id' })).status).toBe(422);
+      const write = jest.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      try {
+        const ok = await transfer({ authorization: `Bearer ${token}`, 'x-guest-id': 'browser-unknown-1' });
+        expect(await ok.json()).toEqual({ transferred: 0 });
+        expect(write.mock.calls.map((c) => String(c[0])).some((l) => l.includes('"action":"billing.guest-transfer"'))).toBe(true);
+      } finally {
+        write.mockRestore();
+      }
+    });
+  });
 });

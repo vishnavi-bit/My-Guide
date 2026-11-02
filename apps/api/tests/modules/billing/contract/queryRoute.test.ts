@@ -86,6 +86,22 @@ describe('query endpoint contract', () => {
     });
   });
 
+  it('every answered query writes one audit entry with the charge kind the engine decided', async () => {
+    const write = jest.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    let written: string[] = [];
+    try {
+      await withApp(usefulEngine(true), async (base) => { await ask(base, { question: 'q' }); });
+      await withApp(usefulEngine(false), async (base) => { await ask(base, { question: 'hi', useful: true }); });
+      written = write.mock.calls.map((c) => String(c[0]));
+    } finally {
+      write.mockRestore();
+    }
+    const lines = written.filter((l) => l.includes('"action":"billing.charge"'));
+    expect(lines).toHaveLength(2);
+    expect(lines[0]).toContain('"charge":"free"');
+    expect(lines[1]).toContain('"charge":"not-charged"');
+  });
+
   it('a question is required, and a guest must identify its browser', async () => {
     await withApp(usefulEngine(true), async (base) => {
       expect((await ask(base, {})).status).toBe(422);

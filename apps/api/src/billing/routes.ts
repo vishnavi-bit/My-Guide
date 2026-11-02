@@ -5,12 +5,16 @@ import type { Db } from '../db/client';
 import type { AuthClaims } from '../auth/jwt';
 import { requireAuth, requireRole } from '../auth/authMiddleware';
 import { wrapAsync } from '../http/app';
-import { BillingError, Subject, getBalance, setSetting, SETTING_BONUS_ACTIVE, SETTING_PRICE_CENTS } from './ledger';
+import { BillingError, Subject, getBalance, setSetting, transferGuestBalance, SETTING_BONUS_ACTIVE, SETTING_PRICE_CENTS } from './ledger';
 import { WhatsAppSender, startWhatsAppConnect, verifyWhatsAppCode } from './whatsapp';
+import { consoleSink, createAuditTrail } from '../audit/auditTrail';
 
 export type BillingRequest = Request & { tenantId?: string; auth?: AuthClaims };
 
 const GUEST_ID = /^[A-Za-z0-9_-]{8,128}$/;
+
+// Balance changes (charges, bonus grants, guest transfers) go to the audit sink, shared with the query route.
+export const billingAudit = createAuditTrail({ sink: consoleSink, onError: (err) => console.error('billing audit failed', err) });
 
 // A signed-in user is identified by the token; anyone else sends a browser id in X-Guest-Id (the guest allowance key).
 export function subjectOf(req: BillingRequest): Subject {
@@ -63,7 +67,24 @@ export function createBillingRoutes(options: { sender: WhatsAppSender | null }) 
       router.post('/api/whatsapp/verify', requireAuth as any, wrapAsync(async (req, res) => {
         const r = req as BillingRequest;
         const code = String((req.body ?? {}).code ?? '');
-        res.json(await verifyWhatsAppCode(dbOf(r), tenantOf(r), r.auth!.userId, code));
+        const tenantId = tenantOf(r);
+        const userId = r.auth!.userId;
+        const result = await verifyWhatsAppCode(dbOf(r), tenantId, userId, code);
+        if (result.bonusGranted) await billingAudit.record({ actor: userId, action: 'billing.bonus-grant', tenantId, meta: { reason: 'whatsapp-verified' } });
+        res.json(result);
+      }));
+
+      // Moves the guest allowance of this browser to the account that was just signed in to (the client sends both).
+      router.post('/api/billing/transfer-guest', requireAuth as any, wrapAsync(async (req, res) => {
+        const r = req as BillingRequest;
+        const guest = req.headers['x-guest-id'];
+        if (typeof guest !== 'string' || !GUEST_ID.test(guest)) throw new BillingError(422, 'guest-id-required');
+        const tenantId = tenantOf(r);
+        const userId = r.auth!.userId;
+        res.setHeader('Cache-Control', 'no-store');
+        const transferred = await transferGuestBalance(dbOf(r), tenantId, guest, userId);
+        await billingAudit.record({ actor: userId, action: 'billing.guest-transfer', tenantId, meta: { transferred } });
+        res.json({ transferred });
       }));
     }
   };

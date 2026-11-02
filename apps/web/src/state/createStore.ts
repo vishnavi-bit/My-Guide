@@ -44,3 +44,11 @@ function pick<T extends object>(state: T, initial: T): Partial<T> {
   for (const k of Object.keys(initial) as (keyof T)[]) if (typeof state[k] !== 'function') out[k] = state[k];
   return out;
 }
+
+// Balance slice (WI-004): the remaining free queries and credits as the API last reported them, and the price of one query. Not
+// persisted: the server is the source of truth, so the balance is read again on every load.
+export const useBalanceStore = createAppStore({
+  freeQueries: null as number | null,
+  bonusCredits: null as number | null,
+  priceCents: null as number | null
+});

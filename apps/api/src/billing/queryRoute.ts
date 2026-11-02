@@ -4,7 +4,7 @@ import type { Router } from 'express';
 import { wrapAsync } from '../http/app';
 import { BillingError, getPriceCents, recordAnsweredQuery } from './ledger';
 import { QueryEngine, stubQueryEngine } from './queryEngine';
-import { BillingRequest, dbOf, subjectOf, tenantOf } from './routes';
+import { BillingRequest, billingAudit, dbOf, subjectOf, tenantOf } from './routes';
 
 const MAX_QUESTION_CHARS = 2000;
 
@@ -25,6 +25,7 @@ export function createQueryRoute(options: { engine: QueryEngine } = { engine: st
 
         const answer = await options.engine.answer({ tenantId, question });
         const { charge, balance } = await recordAnsweredQuery(db, tenantId, subject, answer.useful);
+        await billingAudit.record({ actor: subject.id, action: 'billing.charge', tenantId, meta: { subject: subject.kind, charge } });
         if (charge !== 'payment-required') {
           res.json({ answer: answer.text, charge, balance });
           return;
