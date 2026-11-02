@@ -8,5 +8,9 @@ export const chakraTokens = {
       500: '#2d79ff', 600: '#2361cc', 700: '#1a4999', 800: '#113166', 900: '#091933'
     }
   },
-  fonts: { heading: 'system-ui, sans-serif', body: 'system-ui, sans-serif' }
+  fonts: { heading: 'system-ui, sans-serif', body: 'system-ui, sans-serif' },
+  // Phone is below 640px, tablet 640px to 1023px, desktop 1024px and above. Chakra's own sm and md are overridden here.
+  breakpoints: { sm: '640px', md: '1024px' },
+  // Minimum size of an interactive control on touch devices (44px, the common touch target guideline).
+  sizes: { touchTarget: '44px' }
 };

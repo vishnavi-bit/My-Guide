@@ -2,8 +2,13 @@
 // entries become routes. Modules register in src/app/providers.tsx and src/app/router.tsx, never here.
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Box } from '@chakra-ui/react';
 import { providers as glueProviders } from './providers';
 import { router as glueRoutes } from './router';
+import { AppHeader } from './AppHeader';
+import { AppNav } from './AppNav';
+
+const navId = 'app-nav';
 
 export interface ProviderEntry { id: string; component: React.ComponentType<{ children?: React.ReactNode }> }
 export interface RouteEntry { id: string; path: string; element: React.ReactNode }
@@ -22,12 +27,17 @@ export interface AppProps {
 }
 
 export function App({ providers = glueProviders as ProviderEntry[], routes = glueRoutes as unknown as RouteEntry[], Router = BrowserRouter }: AppProps) {
+  const [menuOpen, setMenuOpen] = React.useState(false);
   const content = (
     <Router>
-      <Routes>
-        {routes.map((r) => <Route key={r.id} path={r.path} element={r.element} />)}
-        <Route path="*" element={<p>Page not found</p>} />
-      </Routes>
+      <AppHeader navId={navId} menuOpen={menuOpen} onToggleMenu={() => setMenuOpen((open) => !open)} />
+      <AppNav id={navId} open={menuOpen} />
+      <Box as="main" minW={0} w="100%" px={{ base: 4, sm: 6 }} py={4}>
+        <Routes>
+          {routes.map((r) => <Route key={r.id} path={r.path} element={r.element} />)}
+          <Route path="*" element={<p>Page not found</p>} />
+        </Routes>
+      </Box>
     </Router>
   );
   return <ErrorBoundary>{providers.reduceRight((inner, p) => <p.component>{inner}</p.component>, content)}</ErrorBoundary>;
